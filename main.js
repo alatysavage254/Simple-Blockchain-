@@ -7,17 +7,28 @@ class Block{
         this.data = data;
         this.previousHash = previousHash;
         this.hash = this.calculateHash()
+        this.nonce = 0;
     }
 
     calculateHash() {
-        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+        return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)+ this.nonce).toString();
 
     }
+    // implementing proof of work
+    mineBlock(difficulty){
+        while(this.hash.substring(0, difficulty) !==Array(difficulty + 1).join("0")){
+            this.nonce++;
+            this.hash = this.calculateHash();
+        }
+        console.log("Block mined: " + this.hash)
+    }
 }
+
 
 class Blockchain{
     constructor() {
         this.chain = [this.createGenesisBlock()]
+        this.difficulty = 4;
 
     }
     createGenesisBlock() {
@@ -30,7 +41,7 @@ class Blockchain{
 
     addBlock(newBlock) {
      newBlock.previousHash = this.getLatesBlock().hash;
-     newBlock.hash = newBlock.calculateHash();
+     newBlock.mineBlock(this.difficulty);
      this.chain.push(newBlock);
     }
 
@@ -53,14 +64,15 @@ class Blockchain{
 }
 
 let alatyCoin = new Blockchain();
+
+console.log('Mining block 1...');
 alatyCoin.addBlock(new Block(1, "18/03/2024", { amount: 4 } ))
+
+console.log('Mining block 2...')
 alatyCoin.addBlock(new Block(2, "20/03/2024", { amount: 10 } ))
 
-console.log('is blockchain valid? ' + alatyCoin.isChainValid())
 
-alatyCoin.chain[1].data = {amount: 100}
-alatyCoin.chain[1].hash = alatyCoin.chain[1].calculateHash();
 
-console.log('is blockchain valid? ' + alatyCoin.isChainValid())
 
-//console.log(JSON.stringify(alatyCoin, null, 4));
+
+
